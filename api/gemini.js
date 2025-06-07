@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     }
 
     // Your Gemini API key - consider using environment variables for security
-    const API_KEY = process.env.GEMINI_API_KEY || "AIzaSyB3ie_l9hmTsAp8VjLnLj8oY-6QBQbNBYc"
+    const API_KEY = process.env.GEMINI_API_KEY || "AIzaSyCrzBcmTtgIdtZQqSI7UCcq5dac0gee_Vw"
 
     const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
 
