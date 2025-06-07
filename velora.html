@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UY Velora - AI Assistant</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <style>
+        :root {
+            /* Light theme (default) */
+            --primary-color: #6c5ce7;
+            --primary-light: #a29bfe;
+            --secondary-color: #ff9f43;
+            --background-color: #f5f7fb;
+            --card-background: #ffffff;
+            --text-color: #2d3436;
+            --light-text-color: #fff;
+            --border-color: #dfe6e9;
+            --header-background: #ffffff;
+            --footer-background: #2d3436;
+            --chat-bubble-ai: #e9e9eb;
+            --chat-text-ai: #2d3436;
+            --form-background: #f0f0f0;
+            --font-family: 'Poppins', sans-serif;
+            --gradient-start: #6c5ce7;
+            --gradient-end: #00cec9;
+            --error-color: #e17055;
+            --success-color: #00b894;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #a29bfe;
+            --primary-light: #6c5ce7;
+            --secondary-color: #ffa502;
+            --background-color: #1e272e;
+            --card-background: #2d3436;
+            --text-color: #dfe6e9;
+            --light-text-color: #fff;
+            --border-color: #636e72;
+            --header-background: #2d3436;
+            --footer-background: #1e272e;
+            --chat-bubble-ai: #485460;
+            --chat-text-ai: #dfe6e9;
+            --form-background: #2d3436;
+            --gradient-start: #6c5ce7;
+            --gradient-end: #00cec9;
+            --error-color: #ff7675;
+            --success-color: #55efc4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        #root {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+
+        /* Header */
+        .app-header {
+            background-color: var(--header-background);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo span {
+            color: var(--secondary-color);
+            margin-left: 5px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-weight: 500;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary-color);
+        }
+
+        .nav-links a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            display: block;
+            margin-top: 2px;
+            right: 0;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover:after, .nav-links a.active:after {
+            width: 100%;
+            left: 0;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            margin-left: 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-color);
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            color: var(--primary-color);
+            transform: rotate(15deg);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+        }
+
+        /* Landing Page */
+        .hero {
+            text-align: center;
+            padding: 5rem 1rem;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: var(--light-text-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero:before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: -50px;
+            right: -50px;
+            bottom: -50px;
+            background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10S0 25.523 0 20s4.477-10 10-10zm10 8c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm40 40c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E") center center;
+            z-index: 0;
+            animation: pulse 15s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2.5rem;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.7;
+        }
+
+        .cta-button {
+            background-color: var(--secondary-color);
+            color: var(--light-text-color);
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .cta-button:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.1);
+            transform: translateX(-100%);
+            transition: transform 0.4s ease;
+            z-index: -1;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .cta-button:hover:before {
+            transform: translateX(0);
+        }
+
+        .features {
+            padding: 5rem 1rem;
+            text-align: center;
+            background-color: var(--background-color);
+        }
+
+        .features h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .features-subtitle {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 4rem;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background-color: var(--card-background);
+            padding: 2.5rem 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transition: transform 0.4s ease, box-shadow 0.4s ease, background-color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .feature-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary-color), var(--gradient-end));
+            transition: width 0.3s ease;
+        }
+
+        .feature-card:hover:before {
+            width: 100%;
+            opacity: 0.05;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            background: rgba(108, 92, 231, 0.1);
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1);
+            background: rgba(108, 92, 231, 0.2);
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .feature-card p {
+            color: var(--text-color);
+            opacity: 0.8;
+            line-height: 1.7;
+        }
+
+        /* About Page */
+        .about-container {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background-color: var(--card-background);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        .about-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .about-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .about-section {
+            margin-bottom: 2rem;
+        }
+
+        .about-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .about-section p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .tech-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .tech-item {
+            background-color: rgba(108, 92, 231, 0.1);
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Privacy & Terms Pages */
+        .legal-container {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background-color: var(--card-background);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        .legal-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .legal-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .legal-section {
+            margin-bottom: 2rem;
+        }
+
+        .legal-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .legal-section p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .legal-section ul {
+            margin-left: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .legal-section li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        /* 404 Page */
+        .not-found-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 70vh;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .not-found-code {
+            font-size: 8rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            margin-bottom: 1rem;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .not-found-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .not-found-text {
+            margin-bottom: 2rem;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .go-home-button {
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .go-home-button:hover {
+            transform: translateY(-3px);
+            background-color: var(--primary-light);
+        }
+
+        /* Chatbot Page */
+        .chatbot-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 140px); /* Full height minus header and footer */
+            max-width: 900px;
+            margin: 2rem auto;
+            background-color: var(--card-background);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            overflow: hidden;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .chatbot-header {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            background-color: var(--card-background);
+            transition: background-color 0.3s ease;
+        }
+
+        .chatbot-title {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-left: 0.5rem;
+        }
+
+        .chatbot-status {
+            width: 10px;
+            height: 10px;
+            background-color: var(--success-color);
+            border-radius: 50%;
+            margin-left: 0.5rem;
+        }
+
+        .message-history {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 1.5rem;
+            max-width: 85%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-content {
+            padding: 1rem 1.2rem;
+            border-radius: 18px;
+            line-height: 1.5;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            white-space: pre-wrap;
+        }
+
+        .message.user {
+            margin-left: auto;
+            flex-direction: row-reverse;
+        }
+
+        .message.user .message-content {
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.ai {
+            margin-right: auto;
+        }
+
+        .message.ai .message-content {
+            background-color: var(--chat-bubble-ai);
+            color: var(--chat-text-ai);
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message.loading .message-content {
+            display: flex;
+            align-items: center;
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+        }
+        
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            margin: 0 2px;
+            background-color: #9e9e9e;
+            border-radius: 50%;
+            display: inline-block;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        
+        .typing-indicator span:nth-of-type(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-of-type(2) { animation-delay: -0.16s; }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+
+        .chat-input-form {
+            display: flex;
+            padding: 1.2rem;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--form-background);
+            transition: background-color 0.3s ease;
+        }
+
+        .chat-input {
+            flex-grow: 1;
+            padding: 1rem 1.2rem;
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            font-size: 1rem;
+            outline: none;
+            background-color: var(--card-background);
+            color: var(--text-color);
+            transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+            font-family: var(--font-family);
+        }
+        
+        .chat-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+        }
+
+        .send-button {
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
+            border: none;
+            padding: 0 1.5rem;
+            margin-left: 0.8rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-button:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .send-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Footer */
+        .app-footer {
+            background-color: var(--footer-background);
+            color: var(--light-text-color);
+            text-align: center;
+            padding: 1.5rem 0;
+            transition: background-color 0.3s ease;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 90%;
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .footer-logo span {
+            color: var(--secondary-color);
+            margin-left: 3px;
+        }
+
+        .footer-links {
+            margin: 1rem 0;
+        }
+
+        .footer-links a {
+            color: var(--light-text-color);
+            text-decoration: none;
+            margin: 0 0.8rem;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Scroll to top button */
+        .scroll-to-top {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1000;
+            font-size: 1.2rem;
+        }
+
+        .scroll-to-top.visible {
+            opacity: 1;
+            pointer-events: auto;
+            animation: bounce-in 0.5s ease;
+        }
+
+        @keyframes bounce-in {
+            0% { transform: scale(0.5); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .scroll-to-top:hover {
+            transform: translateY(-5px);
+            background-color: var(--primary-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .nav-links a {
+                display: none; /* Simple responsive solution for this example */
+            }
+            
+            .chatbot-container {
+                height: calc(100vh - 120px);
+                margin: 1rem auto;
+                border-radius: 10px;
+            }
+            
+            .nav-links .theme-toggle {
+                display: block;
+                margin-left: 0;
+            }
+            
+            .feature-card {
+                padding: 2rem 1.5rem;
+            }
+            
+            .about-container {
+                padding: 1.5rem;
+                margin: 2rem 1rem;
+            }
+            
+            .about-header h2 {
+                font-size: 2rem;
+            }
+            
+            .not-found-code {
+                font-size: 6rem;
+            }
+        }
+
+        /* Mobile menu button */
+        .mobile-menu-button {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-button {
+                display: block;
+            }
+            
+            .nav-links {
+                position: fixed;
+                top: 60px;
+                left: 0;
+                right: 0;
+                background-color: var(--card-background);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                padding: 1rem 0;
+                flex-direction: column;
+                align-items: center;
+                transform: translateY(-150%);
+                transition: transform 0.3s ease;
+                z-index: 1000;
+            }
+            
+            .nav-links.open {
+                transform: translateY(0);
+            }
+            
+            .nav-links a {
+                display: block;
+                margin: 1rem 0;
+            }
+            
+            .theme-toggle {
+                margin: 1rem 0;
+            }
+        }
+    </style>
+<script src="https://lib.youware.com/youware-lib.1747145198.js" id="yourware-lib"></script></head>
+<body>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Components ---
+
+        const ThemeToggle = ({ theme, toggleTheme }) => {
+            return (
+                <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+                    {theme === 'light' ? '🌙' : '☀️'}
+                </button>
+            );
+        };
+
+        const ScrollToTopButton = () => {
+            const [isVisible, setIsVisible] = useState(false);
+
+            const toggleVisibility = () => {
+                if (window.pageYOffset > 300) {
+                    setIsVisible(true);
+                } else {
+                    setIsVisible(false);
+                }
+            };
+
+            const scrollToTop = () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+            };
+
+            useEffect(() => {
+                window.addEventListener("scroll", toggleVisibility);
+                return () => window.removeEventListener("scroll", toggleVisibility);
+            }, []);
+
+            return (
+                <div 
+                    className={`scroll-to-top ${isVisible ? 'visible' : ''}`}
+                    onClick={scrollToTop}
+                >
+                    ↑
+                </div>
+            );
+        };
+
+        const Header = ({ navigate, currentPage, theme, toggleTheme }) => {
+            const [menuOpen, setMenuOpen] = useState(false);
+            
+            const toggleMenu = () => {
+                setMenuOpen(!menuOpen);
+            };
+            
+            const handleNavigation = (page) => {
+                navigate(page);
+                setMenuOpen(false);
+            };
+            
+            return (
+                <header className="app-header">
+                    <div className="header-content">
+                        <div className="logo" onClick={() => handleNavigation('landing')}>
+                            UY<span>Velora</span>
+                        </div>
+                        <button className="mobile-menu-button" onClick={toggleMenu}>
+                            {menuOpen ? '✕' : '☰'}
+                        </button>
+                        <nav className={`nav-links ${menuOpen ? 'open' : ''}`}>
+                            <a href="#" onClick={(e) => { e.preventDefault(); handleNavigation('landing'); }} className={currentPage === 'landing' ? 'active' : ''}>Home</a>
+                            <a href="#" onClick={(e) => { e.preventDefault(); handleNavigation('chatbot'); }} className={currentPage === 'chatbot' ? 'active' : ''}>Chatbot</a>
+                            <a href="#" onClick={(e) => { e.preventDefault(); handleNavigation('about'); }} className={currentPage === 'about' ? 'active' : ''}>About</a>
+                            <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+                        </nav>
+                    </div>
+                </header>
+            );
+        };
+
+        const LandingPage = ({ navigate }) => {
+            return (
+                <div className="landing-page">
+                    <section className="hero">
+                        <div className="hero-content">
+                            <h1>Experience the Power of AI Conversation</h1>
+                            <p>UY Velora is your intelligent AI assistant, designed to provide instant answers, help with tasks, and make your digital experience more productive and enjoyable.</p>
+                            <button className="cta-button" onClick={() => navigate('chatbot')}>Start Chatting</button>
+                        </div>
+                    </section>
+                    <section className="features container">
+                        <h2>Why Choose UY Velora?</h2>
+                        <p className="features-subtitle">A next-generation AI assistant built to understand, learn, and help you achieve more.</p>
+                        <div className="features-grid">
+                            <div className="feature-card">
+                                <div className="feature-icon">⚡</div>
+                                <h3>Instant Responses</h3>
+                                <p>Get answers to your questions in real-time, 24/7. No more waiting for support agents or searching through documentation.</p>
+                            </div>
+                            <div className="feature-card">
+                                <div className="feature-icon">💬</div>
+                                <h3>Natural Language</h3>
+                                <p>UY Velora understands and responds in natural language, making conversations feel human-like and intuitive.</p>
+                            </div>
+                            <div className="feature-card">
+                                <div className="feature-icon">📱</div>
+                                <h3>Multi-Platform</h3>
+                                <p>Access UY Velora on any device, whether you're on a desktop, tablet, or smartphone - your assistant goes wherever you go.</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            );
+        };
+
+        const AboutPage = () => {
+            return (
+                <div className="about-container">
+                    <div className="about-header">
+                        <h2>About UY Velora</h2>
+                    </div>
+                    
+                    <div className="about-section">
+                        <h3>What is UY Velora?</h3>
+                        <p>UY Velora is an advanced AI assistant powered by Google's Gemini language model. It's designed to provide helpful, accurate, and natural conversations on a wide range of topics. Whether you need information, creative ideas, problem-solving assistance, or just someone to chat with, UY Velora is here to help.</p>
+                    </div>
+                    
+                    <div className="about-section">
+                        <h3>What Can It Do?</h3>
+                        <p>UY Velora can assist with various tasks, including:</p>
+                        <ul>
+                            <li>Answering questions on diverse topics</li>
+                            <li>Providing explanations and definitions</li>
+                            <li>Generating creative content</li>
+                            <li>Offering suggestions and recommendations</li>
+                            <li>Engaging in meaningful conversations</li>
+                            <li>Helping with problem-solving and brainstorming</li>
+                        </ul>
+                    </div>
+                    
+                    <div className="about-section">
+                        <h3>How It Was Built</h3>
+                        <p>UY Velora was built using modern web technologies and AI capabilities. The application is powered by:</p>
+                        <div className="tech-list">
+                            <div className="tech-item">React</div>
+                            <div className="tech-item">JavaScript</div>
+                            <div className="tech-item">CSS3</div>
+                            <div className="tech-item">HTML5</div>
+                            <div className="tech-item">Google Gemini API</div>
+                            <div className="tech-item">Responsive Design</div>
+                        </div>
+                        <p>The interface is designed to be intuitive, responsive, and accessible across all devices. The AI functionality is implemented through Google's Gemini API, which provides state-of-the-art natural language understanding and generation capabilities.</p>
+                    </div>
+                    
+                    <div className="about-section">
+                        <h3>Privacy & Data</h3>
+                        <p>UY Velora respects your privacy. Your conversations are not stored on our servers, and your API key is only saved in your local browser storage. We do not track or collect any personal information beyond what's necessary for the application to function.</p>
+                    </div>
+                </div>
+            );
+        };
+
+        const PrivacyPage = () => {
+            return (
+                <div className="legal-container">
+                    <div className="legal-header">
+                        <h2>Privacy Policy</h2>
+                    </div>
+                    
+                    <div className="legal-section">
+                        <h3>Introduction</h3>
+                        <p>Welcome to UY Velora's Privacy Policy. This document outlines how we collect, use, and protect your personal information when you use our AI chatbot service.</p>
+                    </div>
+                    
+                    <div className="legal-section">
+                        <h3>Information Collection</h3>
+                        <p>We collect minimal personal information necessary to provide our services:</p>
+                        <ul>
+                            <li>Chat messages you send to UY Velora</li>
+                            <li>Device information (browser type, operating system)</li>
+                            <li>API keys that you provide (stored locally on your device only)</li>
+                        </ul>
+                    </div>
+                    
+                    <div className="legal-section">
+                        <h3>Use of Information</h3>
+                        <p>Your information is used solely to:</p>
+                        <ul>
+                            <li>Provide AI-powered responses to your queries</li>
+                            <li>Improve the functionality of UY Velora</li>
+                            <li>Ensure the security and stability of our service</li>
+                        </ul>
+                    </div>
+                    
+                    <div className="legal-section">
+                        <h3>Data Storage</h3>
+                        <p>UY Velora is designed with privacy in mind:</p>
+                        <ul>
+                            <li>Chat messages are not permanently stored on our servers</li>
+                            <li>Your API key is stored only in your local browser storage</li>
+                            <li>No user accounts or profiles are created</li>
+                        </ul>
+                    </div>
+                    
+                    <div className="legal-section">
+                        <h3>Third-Party Services</h3>
+                        <p>UY Velora interfaces with Google's Gemini API to provide AI functionality. When you send messages to UY Velora, they are processed by Google's Gemini API according to their terms of service and privacy policy.</p>
+                    </div>
+                    
+                    <div className="legal-section">
+                        <h3>Changes to This Policy</h3>
+                        <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page.</p>
+                    </div>
+                </div>
+            );
+        };
+
+        const TermsPage = () => {
+            return (
+                <div className="legal-container">
+                    <div className="legal-header">
+                        <h2>Terms of Service</h2>
+                    </div>
+                    
+                    <div className="legal-section">
+                        <h3>Acceptance of Terms</h3>
+                        <p>By using UY Velora, you agree to these Terms of Service. If you do not agree, please do not use our service.</p>
+                    </div>
+                    
+                    <div className="legal-section">
+                        <h3>Service Description</h3>
+                        <p>UY Velora is an AI assistant powered by Google's Gemini API that provides conversational responses to user queries. The service is provided as-is, and we make no warranties about the accuracy, reliability, or suitability of responses.</p>
+                    </div>
+                    
+                    <div className="legal-section">
+                        <h3>User Responsibilities</h3>
+                        <p>When using UY Velora, you agree to:</p>
+                        <ul>
+                            <li>Not use the service for illegal or harmful purposes</li>
+                            <li>Not attempt to exploit or compromise the security of the service</li>
+                            <li>Not send content that violates intellectual property rights</li>
+                            <li>Not use the service to generate harmful, offensive, or misleading content</li>
+                            <li>Protect your API key and not share it with others</li>
+                        </ul>
+                    </div>
+                    
+                    <div className="legal-section">
+                        <h3>Intellectual Property</h3>
+                        <p>The UY Velora service, including its design, code, and branding, is protected by copyright and other intellectual property laws. You may not replicate, modify, or distribute the service without explicit permission.</p>
+                    </div>
+                    
+                    <div className="legal-section">
+                        <h3>Limitations of Liability</h3>
+                        <p>UY Velora is provided on an "as is" and "as available" basis. We are not liable for any damages arising from:</p>
+                        <ul>
+                            <li>Use or inability to use our service</li>
+                            <li>Inaccurate or inappropriate AI-generated responses</li>
+                            <li>Service interruptions or technical issues</li>
+                            <li>Loss of data or breaches outside our control</li>
+                        </ul>
+                    </div>
+                    
+                    <div className="legal-section">
+                        <h3>Modifications to Service</h3>
+                        <p>We reserve the right to modify, suspend, or discontinue UY Velora at any time without notice. We may also update these Terms of Service periodically.</p>
+                    </div>
+                </div>
+            );
+        };
+
+        const NotFoundPage = ({ navigate }) => {
+            return (
+                <div className="not-found-container">
+                    <div className="not-found-code">404</div>
+                    <h2 className="not-found-title">Page Not Found</h2>
+                    <p className="not-found-text">Oops! The page you're looking for doesn't exist or has been moved.</p>
+                    <button className="go-home-button" onClick={() => navigate('landing')}>Go Back Home</button>
+                </div>
+            );
+        };
+
+        const ChatbotPage = () => {
+            const [messages, setMessages] = useState([
+                { type: 'ai', text: 'Hello! I\'m UY Velora, your AI assistant powered by Google\'s Gemini. How can I help you today?' }
+            ]);
+            const [inputValue, setInputValue] = useState('');
+            const [isLoading, setIsLoading] = useState(false);
+            const messageHistoryRef = useRef(null);
+
+            useEffect(() => {
+                if (messageHistoryRef.current) {
+                    messageHistoryRef.current.scrollTop = messageHistoryRef.current.scrollHeight;
+                }
+            }, [messages]);
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                if (!inputValue.trim() || isLoading) return;
+
+                const userMessage = { type: 'user', text: inputValue };
+                setMessages(prev => [...prev, userMessage]);
+                const currentInput = inputValue;
+                setInputValue('');
+                setIsLoading(true);
+
+                try {
+                    // Check for basic questions first
+                    const lowerPrompt = currentInput.toLowerCase();
+                    
+                    if (lowerPrompt.includes('hello') || lowerPrompt.includes('hi')) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        const aiMessage = { type: 'ai', text: "Hello! I'm UY Velora, powered by Google's Gemini AI. How can I assist you today?" };
+                        setMessages(prev => [...prev, aiMessage]);
+                    }
+                    else if (lowerPrompt.includes('who are you')) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        const aiMessage = { type: 'ai', text: "I'm UY Velora, an AI assistant powered by Google's Gemini language model. I'm designed to have helpful conversations and assist with a wide range of topics. I can answer questions, provide information, generate creative content, and much more. How can I help you today?" };
+                        setMessages(prev => [...prev, aiMessage]);
+                    }
+                    else if (lowerPrompt.includes('what can you do')) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        const aiMessage = { type: 'ai', text: "As UY Velora, I can help you with many things including:\n\n• Answering questions on a wide range of topics\n• Providing explanations and clarifications\n• Creating content like stories, poems, or scripts\n• Offering suggestions and recommendations\n• Providing summaries of information\n• Helping with problem-solving\n• Having natural conversations\n\nI'm continuously learning to better assist you. What would you like help with today?" };
+                        setMessages(prev => [...prev, aiMessage]);
+                    }
+                    else {
+                        // For all other questions, call the serverless function
+                        const response = await fetch('/api/gemini', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ message: currentInput })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        
+                        if (data.response) {
+                            const aiMessage = { type: 'ai', text: data.response };
+                            setMessages(prev => [...prev, aiMessage]);
+                        } else {
+                            throw new Error('Invalid response format');
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error getting AI response:", error);
+                    const errorMessage = { 
+                        type: 'ai', 
+                        text: "Sorry, I encountered an error processing your request. Please try again in a moment." 
+                    };
+                    setMessages(prev => [...prev, errorMessage]);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            return (
+                <div className="chatbot-container">
+                    <div className="chatbot-header">
+                        <div className="chatbot-status"></div>
+                        <div className="chatbot-title">UY Velora Assistant</div>
+                    </div>
+                    <div className="message-history" ref={messageHistoryRef}>
+                        {messages.map((msg, index) => (
+                            <div key={index} className={`message ${msg.type}`}>
+                                <div className="message-content">{msg.text}</div>
+                            </div>
+                        ))}
+                        {isLoading && (
+                            <div className="message ai loading">
+                                <div className="message-content">
+                                    <div className="typing-indicator">
+                                        <span></span><span></span><span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <form className="chat-input-form" onSubmit={handleSubmit}>
+                        <input
+                            type="text"
+                            className="chat-input"
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            placeholder="Type your message to UY Velora..."
+                            disabled={isLoading}
+                        />
+                        <button type="submit" className="send-button" disabled={isLoading}>
+                            Send
+                        </button>
+                    </form>
+                </div>
+            );
+        };
+
+        const Footer = ({ navigate }) => {
+            return (
+                <footer className="app-footer">
+                    <div className="footer-content">
+                        <div className="footer-logo">UY<span>Velora</span></div>
+                        <div className="footer-links">
+                            <a href="#" onClick={(e) => {e.preventDefault(); navigate('landing');}}>Home</a>
+                            <a href="#" onClick={(e) => {e.preventDefault(); navigate('about');}}>About</a>
+                            <a href="#" onClick={(e) => {e.preventDefault(); navigate('privacy');}}>Privacy</a>
+                            <a href="#" onClick={(e) => {e.preventDefault(); navigate('terms');}}>Terms</a>
+                        </div>
+                        <p>© 2025 UY Velora. All rights reserved.</p>
+                    </div>
+                </footer>
+            );
+        };
+
+        // --- Main App Component ---
+
+        const App = () => {
+            const [currentPage, setCurrentPage] = useState('landing');
+            const [theme, setTheme] = useState(() => {
+                const savedTheme = localStorage.getItem('theme');
+                return savedTheme || 'light';
+            });
+
+            useEffect(() => {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+            }, [theme]);
+
+            const toggleTheme = () => {
+                setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+            };
+
+            const navigate = (page) => {
+                setCurrentPage(page);
+                // Scroll to top when navigating
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+            };
+
+            const renderPage = () => {
+                switch(currentPage) {
+                    case 'landing':
+                        return <LandingPage navigate={navigate} />;
+                    case 'chatbot':
+                        return <ChatbotPage />;
+                    case 'about':
+                        return <AboutPage />;
+                    case 'privacy':
+                        return <PrivacyPage />;
+                    case 'terms':
+                        return <TermsPage />;
+                    default:
+                        return <NotFoundPage navigate={navigate} />;
+                }
+            };
+
+            return (
+                <React.Fragment>
+                    <Header 
+                        navigate={navigate} 
+                        currentPage={currentPage} 
+                        theme={theme} 
+                        toggleTheme={toggleTheme}
+                    />
+                    <main className="main-content">
+                        {renderPage()}
+                    </main>
+                    <Footer navigate={navigate} />
+                    <ScrollToTopButton />
+                </React.Fragment>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
