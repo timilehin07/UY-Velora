@@ -31,8 +31,15 @@ export default async function handler(req, res) {
       })
     }
 
-    // Use the working endpoint (based on diagnostic results)
-    const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
+    // Replace this line:
+    // const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
+
+    // With this updated code:
+    const modelNames = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-1.0-pro", "gemini-pro"]
+
+    let response
+    let lastError
+    let data
 
     const requestBody = {
       contents: [
@@ -48,36 +55,43 @@ export default async function handler(req, res) {
       },
     }
 
-    console.log("Making request to Gemini API...")
+    // Try each model until one works
+    for (const modelName of modelNames) {
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`
 
-    const response = await fetch(`${endpoint}?key=${API_KEY}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    })
+        console.log(`Trying model: ${modelName}`)
 
-    console.log("Gemini API response status:", response.status)
-
-    if (!response.ok) {
-      const errorData = await response.text()
-      console.error("Gemini API Error:", response.status, errorData)
-
-      if (response.status === 400 && errorData.includes("API_KEY_INVALID")) {
-        return res.status(400).json({
-          error: "Invalid API key. Please check your GEMINI_API_KEY environment variable.",
-          details: "Generate a new API key at https://makersuite.google.com/app/apikey",
+        response = await fetch(`${endpoint}?key=${API_KEY}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
         })
-      }
 
-      return res.status(response.status).json({
-        error: `Gemini API error: ${response.status}`,
-        details: errorData,
-      })
+        if (response.ok) {
+          console.log(`Success with model: ${modelName}`)
+          data = await response.json()
+          break // Found a working model
+        } else {
+          const errorText = await response.text()
+          console.log(`Model ${modelName} failed:`, response.status, errorText)
+          lastError = errorText
+        }
+      } catch (error) {
+        console.log(`Model ${modelName} error:`, error.message)
+        lastError = error.message
+      }
     }
 
-    const data = await response.json()
+    if (!response || !response.ok) {
+      console.error("All models failed. Last error:", lastError)
+      return res.status(500).json({
+        error: "All Gemini models failed",
+        details: lastError,
+      })
+    }
 
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
       const aiResponse = data.candidates[0].content.parts[0].text
