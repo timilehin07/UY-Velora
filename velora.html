@@ -931,6 +931,16 @@
         .scroll-to-top {
             position: fixed;
             bottom: 25px;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Scroll to top button */
+        .scroll-to-top {
+            position: fixed;
+            bottom: 25px;
             right: 25px;
             width: 45px;
             height: 45px;
@@ -1556,8 +1566,6 @@
                     }
                     else {
                         // For all other questions, call the serverless function
-                        console.log('Making API call to /api/gemini with message:', currentInput);
-                        
                         const response = await fetch('/api/gemini', {
                             method: 'POST',
                             headers: {
@@ -1566,22 +1574,15 @@
                             body: JSON.stringify({ message: currentInput })
                         });
 
-                        console.log('API response status:', response.status);
-
                         if (!response.ok) {
-                            const errorText = await response.text();
-                            console.error('API error response:', errorText);
-                            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                            throw new Error(`HTTP error! status: ${response.status}`);
                         }
 
                         const data = await response.json();
-                        console.log('API response data:', data);
                         
                         if (data.response) {
                             const aiMessage = { type: 'ai', text: data.response };
                             setMessages(prev => [...prev, aiMessage]);
-                        } else if (data.error) {
-                            throw new Error(data.error);
                         } else {
                             throw new Error('Invalid response format');
                         }
@@ -1590,7 +1591,7 @@
                     console.error("Error getting AI response:", error);
                     const errorMessage = { 
                         type: 'ai', 
-                        text: `Sorry, I encountered an error: ${error.message}. Please check the browser console for more details and try again.` 
+                        text: "Sorry, I encountered an error processing your request. Please try again in a moment." 
                     };
                     setMessages(prev => [...prev, errorMessage]);
                 } finally {
