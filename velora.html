@@ -839,7 +839,7 @@
             }
         }
     </style>
-<script src="https://lib.youware.com/youware-lib.1747145198.js" id="yourware-lib"></script></head>
+</head>
 <body>
     <div id="root"></div>
 
@@ -1171,6 +1171,8 @@
                     }
                     else {
                         // For all other questions, call the serverless function
+                        console.log('Making API call to /api/gemini with message:', currentInput);
+                        
                         const response = await fetch('/api/gemini', {
                             method: 'POST',
                             headers: {
@@ -1179,15 +1181,22 @@
                             body: JSON.stringify({ message: currentInput })
                         });
 
+                        console.log('API response status:', response.status);
+
                         if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
+                            const errorText = await response.text();
+                            console.error('API error response:', errorText);
+                            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
                         }
 
                         const data = await response.json();
+                        console.log('API response data:', data);
                         
                         if (data.response) {
                             const aiMessage = { type: 'ai', text: data.response };
                             setMessages(prev => [...prev, aiMessage]);
+                        } else if (data.error) {
+                            throw new Error(data.error);
                         } else {
                             throw new Error('Invalid response format');
                         }
@@ -1196,7 +1205,7 @@
                     console.error("Error getting AI response:", error);
                     const errorMessage = { 
                         type: 'ai', 
-                        text: "Sorry, I encountered an error processing your request. Please try again in a moment." 
+                        text: `Sorry, I encountered an error: ${error.message}. Please check the browser console for more details and try again.` 
                     };
                     setMessages(prev => [...prev, errorMessage]);
                 } finally {
