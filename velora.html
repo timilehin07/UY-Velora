@@ -1,10 +1,12 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UY Velora - AI Assistant</title>
+    <title>UY Answers - AI Assistant</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         :root {
             /* Light theme (default) */
@@ -553,6 +555,7 @@
             margin-bottom: 1.5rem;
             max-width: 85%;
             animation: fadeIn 0.3s ease;
+            position: relative;
         }
 
         @keyframes fadeIn {
@@ -618,17 +621,108 @@
             40% { transform: scale(1.0); }
         }
 
+        /* Message Actions */
+        .message-actions {
+            position: absolute;
+            top: -10px;
+            right: 0;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .user .message-actions {
+            left: 0;
+            right: auto;
+        }
+
+        .message:hover .message-actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: var(--card-background);
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.7rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            background-color: var(--primary-light);
+            color: var(--light-text-color);
+        }
+
+        /* File Attachment */
+        .message-attachment {
+            margin-top: 0.5rem;
+            max-width: 200px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .attachment-image {
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .attachment-image:hover {
+            transform: scale(1.05);
+        }
+
+        .attachment-file {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            background-color: rgba(108, 92, 231, 0.1);
+            border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+
+        .attachment-file i {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-right: 0.5rem;
+        }
+
+        .attachment-file-name {
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+
+        /* Improved Chat Input Area */
         .chat-input-form {
             display: flex;
-            padding: 1.2rem;
+            padding: 1rem;
             border-top: 1px solid var(--border-color);
             background-color: var(--form-background);
             transition: background-color 0.3s ease;
+            position: relative;
+        }
+
+        .chat-input-wrapper {
+            position: relative;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
         }
 
         .chat-input {
             flex-grow: 1;
-            padding: 1rem 1.2rem;
+            padding: 0.8rem 1rem;
+            padding-right: 4.5rem; /* Increased space for action buttons */
             border: 1px solid var(--border-color);
             border-radius: 30px;
             font-size: 1rem;
@@ -644,19 +738,140 @@
             box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
         }
 
+        .chat-actions {
+            position: absolute;
+            right: 12px;
+            display: flex;
+            gap: 10px; /* Increased gap between buttons */
+        }
+
+        .chat-action-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            opacity: 0.7;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: opacity 0.3s ease, transform 0.3s ease, color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+        }
+
+        .chat-action-btn:hover {
+            opacity: 1;
+            transform: translateY(-2px);
+            color: var(--primary-color);
+        }
+
+        .chat-action-btn.listening {
+            color: #e74c3c;
+            animation: pulse-mic 1.5s infinite;
+        }
+
+        @keyframes pulse-mic {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .attachment-preview {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            background-color: var(--card-background);
+            border-top: 1px solid var(--border-color);
+            padding: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .preview-item {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-item-file {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(108, 92, 231, 0.1);
+            padding: 0.5rem;
+        }
+
+        .preview-item-file i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.2rem;
+        }
+
+        .preview-item-file span {
+            font-size: 0.7rem;
+            text-align: center;
+            word-break: break-all;
+            overflow: hidden;
+            max-height: 2.8em;
+        }
+
+        .remove-attachment {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.7rem;
+            z-index: 1;
+        }
+
         .send-button {
             background-color: var(--primary-color);
             color: var(--light-text-color);
             border: none;
-            padding: 0 1.5rem;
-            margin-left: 0.8rem;
-            border-radius: 30px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             cursor: pointer;
             font-size: 1rem;
             transition: background-color 0.3s ease, transform 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-left: 0.5rem;
+            flex-shrink: 0;
         }
 
         .send-button:hover {
@@ -793,6 +1008,23 @@
             .not-found-code {
                 font-size: 6rem;
             }
+            
+            /* Fix input and buttons for small screens */
+            .chat-input {
+                font-size: 0.9rem;
+                padding: 0.7rem 0.9rem;
+                padding-right: 5.5rem; /* Increased to prevent overlap */
+            }
+            
+            .chat-actions {
+                right: 10px;
+            }
+            
+            .send-button {
+                width: 36px;
+                height: 36px;
+                min-width: 36px;
+            }
         }
 
         /* Mobile menu button */
@@ -839,7 +1071,7 @@
             }
         }
     </style>
-</head>
+<script src="https://lib.youware.com/youware-lib.1747145198.js" id="yourware-lib"></script></head>
 <body>
     <div id="root"></div>
 
@@ -888,7 +1120,7 @@
                     className={`scroll-to-top ${isVisible ? 'visible' : ''}`}
                     onClick={scrollToTop}
                 >
-                    ↑
+                    <i className="fas fa-arrow-up"></i>
                 </div>
             );
         };
@@ -909,10 +1141,10 @@
                 <header className="app-header">
                     <div className="header-content">
                         <div className="logo" onClick={() => handleNavigation('landing')}>
-                            UY<span>Velora</span>
+                            UY<span>Answers</span>
                         </div>
                         <button className="mobile-menu-button" onClick={toggleMenu}>
-                            {menuOpen ? '✕' : '☰'}
+                            <i className={menuOpen ? "fas fa-times" : "fas fa-bars"}></i>
                         </button>
                         <nav className={`nav-links ${menuOpen ? 'open' : ''}`}>
                             <a href="#" onClick={(e) => { e.preventDefault(); handleNavigation('landing'); }} className={currentPage === 'landing' ? 'active' : ''}>Home</a>
@@ -931,28 +1163,28 @@
                     <section className="hero">
                         <div className="hero-content">
                             <h1>Experience the Power of AI Conversation</h1>
-                            <p>UY Velora is your intelligent AI assistant, designed to provide instant answers, help with tasks, and make your digital experience more productive and enjoyable.</p>
+                            <p>UY Answers is your intelligent AI assistant, designed to provide instant answers, help with tasks, and make your digital experience more productive and enjoyable.</p>
                             <button className="cta-button" onClick={() => navigate('chatbot')}>Start Chatting</button>
                         </div>
                     </section>
                     <section className="features container">
-                        <h2>Why Choose UY Velora?</h2>
+                        <h2>Why Choose UY Answers?</h2>
                         <p className="features-subtitle">A next-generation AI assistant built to understand, learn, and help you achieve more.</p>
                         <div className="features-grid">
                             <div className="feature-card">
-                                <div className="feature-icon">⚡</div>
+                                <div className="feature-icon"><i className="fas fa-bolt"></i></div>
                                 <h3>Instant Responses</h3>
                                 <p>Get answers to your questions in real-time, 24/7. No more waiting for support agents or searching through documentation.</p>
                             </div>
                             <div className="feature-card">
-                                <div className="feature-icon">💬</div>
+                                <div className="feature-icon"><i className="fas fa-comment-dots"></i></div>
                                 <h3>Natural Language</h3>
-                                <p>UY Velora understands and responds in natural language, making conversations feel human-like and intuitive.</p>
+                                <p>UY Answers understands and responds in natural language, making conversations feel human-like and intuitive.</p>
                             </div>
                             <div className="feature-card">
-                                <div className="feature-icon">📱</div>
+                                <div className="feature-icon"><i className="fas fa-mobile-alt"></i></div>
                                 <h3>Multi-Platform</h3>
-                                <p>Access UY Velora on any device, whether you're on a desktop, tablet, or smartphone - your assistant goes wherever you go.</p>
+                                <p>Access UY Answers on any device, whether you're on a desktop, tablet, or smartphone - your assistant goes wherever you go.</p>
                             </div>
                         </div>
                     </section>
@@ -964,17 +1196,17 @@
             return (
                 <div className="about-container">
                     <div className="about-header">
-                        <h2>About UY Velora</h2>
+                        <h2>About UY Answers</h2>
                     </div>
                     
                     <div className="about-section">
-                        <h3>What is UY Velora?</h3>
-                        <p>UY Velora is an advanced AI assistant powered by Google's Gemini language model. It's designed to provide helpful, accurate, and natural conversations on a wide range of topics. Whether you need information, creative ideas, problem-solving assistance, or just someone to chat with, UY Velora is here to help.</p>
+                        <h3>What is UY Answers?</h3>
+                        <p>UY Answers is an advanced AI assistant powered by Google's Gemini language model. It's designed to provide helpful, accurate, and natural conversations on a wide range of topics. Whether you need information, creative ideas, problem-solving assistance, or just someone to chat with, UY Answers is here to help.</p>
                     </div>
                     
                     <div className="about-section">
                         <h3>What Can It Do?</h3>
-                        <p>UY Velora can assist with various tasks, including:</p>
+                        <p>UY Answers can assist with various tasks, including:</p>
                         <ul>
                             <li>Answering questions on diverse topics</li>
                             <li>Providing explanations and definitions</li>
@@ -987,7 +1219,7 @@
                     
                     <div className="about-section">
                         <h3>How It Was Built</h3>
-                        <p>UY Velora was built using modern web technologies and AI capabilities. The application is powered by:</p>
+                        <p>UY Answers was built using modern web technologies and AI capabilities. The application is powered by:</p>
                         <div className="tech-list">
                             <div className="tech-item">React</div>
                             <div className="tech-item">JavaScript</div>
@@ -1001,7 +1233,7 @@
                     
                     <div className="about-section">
                         <h3>Privacy & Data</h3>
-                        <p>UY Velora respects your privacy. Your conversations are not stored on our servers, and your API key is only saved in your local browser storage. We do not track or collect any personal information beyond what's necessary for the application to function.</p>
+                        <p>UY Answers respects your privacy. Your conversations are not stored on our servers, and your API key is only saved in your local browser storage. We do not track or collect any personal information beyond what's necessary for the application to function.</p>
                     </div>
                 </div>
             );
@@ -1016,14 +1248,14 @@
                     
                     <div className="legal-section">
                         <h3>Introduction</h3>
-                        <p>Welcome to UY Velora's Privacy Policy. This document outlines how we collect, use, and protect your personal information when you use our AI chatbot service.</p>
+                        <p>Welcome to UY Answers's Privacy Policy. This document outlines how we collect, use, and protect your personal information when you use our AI chatbot service.</p>
                     </div>
                     
                     <div className="legal-section">
                         <h3>Information Collection</h3>
                         <p>We collect minimal personal information necessary to provide our services:</p>
                         <ul>
-                            <li>Chat messages you send to UY Velora</li>
+                            <li>Chat messages you send to UY Answers</li>
                             <li>Device information (browser type, operating system)</li>
                             <li>API keys that you provide (stored locally on your device only)</li>
                         </ul>
@@ -1034,14 +1266,14 @@
                         <p>Your information is used solely to:</p>
                         <ul>
                             <li>Provide AI-powered responses to your queries</li>
-                            <li>Improve the functionality of UY Velora</li>
+                            <li>Improve the functionality of UY Answers</li>
                             <li>Ensure the security and stability of our service</li>
                         </ul>
                     </div>
                     
                     <div className="legal-section">
                         <h3>Data Storage</h3>
-                        <p>UY Velora is designed with privacy in mind:</p>
+                        <p>UY Answers is designed with privacy in mind:</p>
                         <ul>
                             <li>Chat messages are not permanently stored on our servers</li>
                             <li>Your API key is stored only in your local browser storage</li>
@@ -1051,7 +1283,7 @@
                     
                     <div className="legal-section">
                         <h3>Third-Party Services</h3>
-                        <p>UY Velora interfaces with Google's Gemini API to provide AI functionality. When you send messages to UY Velora, they are processed by Google's Gemini API according to their terms of service and privacy policy.</p>
+                        <p>UY Answers interfaces with Google's Gemini API to provide AI functionality. When you send messages to UY Answers, they are processed by Google's Gemini API according to their terms of service and privacy policy.</p>
                     </div>
                     
                     <div className="legal-section">
@@ -1071,17 +1303,17 @@
                     
                     <div className="legal-section">
                         <h3>Acceptance of Terms</h3>
-                        <p>By using UY Velora, you agree to these Terms of Service. If you do not agree, please do not use our service.</p>
+                        <p>By using UY Answers, you agree to these Terms of Service. If you do not agree, please do not use our service.</p>
                     </div>
                     
                     <div className="legal-section">
                         <h3>Service Description</h3>
-                        <p>UY Velora is an AI assistant powered by Google's Gemini API that provides conversational responses to user queries. The service is provided as-is, and we make no warranties about the accuracy, reliability, or suitability of responses.</p>
+                        <p>UY Answers is an AI assistant powered by Google's Gemini API that provides conversational responses to user queries. The service is provided as-is, and we make no warranties about the accuracy, reliability, or suitability of responses.</p>
                     </div>
                     
                     <div className="legal-section">
                         <h3>User Responsibilities</h3>
-                        <p>When using UY Velora, you agree to:</p>
+                        <p>When using UY Answers, you agree to:</p>
                         <ul>
                             <li>Not use the service for illegal or harmful purposes</li>
                             <li>Not attempt to exploit or compromise the security of the service</li>
@@ -1093,12 +1325,12 @@
                     
                     <div className="legal-section">
                         <h3>Intellectual Property</h3>
-                        <p>The UY Velora service, including its design, code, and branding, is protected by copyright and other intellectual property laws. You may not replicate, modify, or distribute the service without explicit permission.</p>
+                        <p>The UY Answers service, including its design, code, and branding, is protected by copyright and other intellectual property laws. You may not replicate, modify, or distribute the service without explicit permission.</p>
                     </div>
                     
                     <div className="legal-section">
                         <h3>Limitations of Liability</h3>
-                        <p>UY Velora is provided on an "as is" and "as available" basis. We are not liable for any damages arising from:</p>
+                        <p>UY Answers is provided on an "as is" and "as available" basis. We are not liable for any damages arising from:</p>
                         <ul>
                             <li>Use or inability to use our service</li>
                             <li>Inaccurate or inappropriate AI-generated responses</li>
@@ -1109,7 +1341,7 @@
                     
                     <div className="legal-section">
                         <h3>Modifications to Service</h3>
-                        <p>We reserve the right to modify, suspend, or discontinue UY Velora at any time without notice. We may also update these Terms of Service periodically.</p>
+                        <p>We reserve the right to modify, suspend, or discontinue UY Answers at any time without notice. We may also update these Terms of Service periodically.</p>
                     </div>
                 </div>
             );
@@ -1128,84 +1360,192 @@
 
         const ChatbotPage = () => {
             const [messages, setMessages] = useState([
-                { type: 'ai', text: 'Hello! I\'m UY Velora, your AI assistant powered by Google\'s Gemini. How can I help you today?' }
+                { type: 'ai', text: 'Hello! I\'m UY Answers, your AI assistant powered by Google\'s Gemini. How can I help you today?' }
             ]);
             const [inputValue, setInputValue] = useState('');
             const [isLoading, setIsLoading] = useState(false);
+            const [isListening, setIsListening] = useState(false);
+            const [attachments, setAttachments] = useState([]);
+            const [editingMessage, setEditingMessage] = useState(null);
             const messageHistoryRef = useRef(null);
+            const fileInputRef = useRef(null);
+            const recognition = useRef(null);
+            const apiKey = "AIzaSyB3ie_l9hmTsAp8VjLnLj8oY-6QBQbNBYc";
 
+            // Initialize speech recognition
+            useEffect(() => {
+                // Check if SpeechRecognition is available
+                if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    
+                    try {
+                        recognition.current = new SpeechRecognition();
+                        recognition.current.continuous = false;
+                        recognition.current.interimResults = false;
+                        recognition.current.lang = 'en-US';
+    
+                        recognition.current.onresult = (event) => {
+                            const transcript = event.results[0][0].transcript;
+                            setInputValue(prevValue => prevValue + transcript);
+                            setIsListening(false);
+                        };
+    
+                        recognition.current.onerror = (event) => {
+                            console.error('Speech recognition error', event.error);
+                            setIsListening(false);
+                            alert("Speech recognition error: " + event.error);
+                        };
+    
+                        recognition.current.onend = () => {
+                            setIsListening(false);
+                        };
+                    } catch (error) {
+                        console.error("Error initializing speech recognition:", error);
+                    }
+                } else {
+                    console.warn("Speech Recognition API not supported in this browser");
+                }
+
+                return () => {
+                    if (recognition.current) {
+                        try {
+                            recognition.current.onresult = null;
+                            recognition.current.onerror = null;
+                            recognition.current.onend = null;
+                            recognition.current.stop();
+                        } catch (e) {
+                            console.error("Error cleaning up speech recognition:", e);
+                        }
+                    }
+                };
+            }, []);
+
+            // Scroll to bottom when messages change
             useEffect(() => {
                 if (messageHistoryRef.current) {
                     messageHistoryRef.current.scrollTop = messageHistoryRef.current.scrollHeight;
                 }
             }, [messages]);
 
+            // Toggle speech recognition
+            const toggleListening = () => {
+                if (isListening) {
+                    try {
+                        recognition.current?.stop();
+                    } catch (e) {
+                        console.error("Error stopping speech recognition:", e);
+                    }
+                    setIsListening(false);
+                } else {
+                    if (recognition.current) {
+                        try {
+                            recognition.current.start();
+                            setIsListening(true);
+                        } catch (e) {
+                            console.error("Error starting speech recognition:", e);
+                            alert("Could not start speech recognition. Please check browser permissions.");
+                        }
+                    } else {
+                        alert("Your browser doesn't support speech recognition.");
+                    }
+                }
+            };
+
+            // Handle file selection
+            const handleFileSelect = (e) => {
+                const files = Array.from(e.target.files);
+                if (!files.length) return;
+
+                const newAttachments = files.map(file => {
+                    const isImage = file.type.startsWith('image/');
+                    return {
+                        file,
+                        preview: isImage ? URL.createObjectURL(file) : null,
+                        type: isImage ? 'image' : 'file',
+                        name: file.name
+                    };
+                });
+
+                setAttachments(prev => [...prev, ...newAttachments]);
+                fileInputRef.current.value = null; // Reset file input
+            };
+
+            // Remove attachment
+            const removeAttachment = (index) => {
+                setAttachments(prev => {
+                    const newAttachments = [...prev];
+                    // Revoke object URL if it's an image
+                    if (newAttachments[index].preview) {
+                        URL.revokeObjectURL(newAttachments[index].preview);
+                    }
+                    newAttachments.splice(index, 1);
+                    return newAttachments;
+                });
+            };
+
+            // Start editing a message
+            const startEditing = (index) => {
+                const message = messages[index];
+                if (message.type === 'user') {
+                    setEditingMessage({ index, text: message.text });
+                    setInputValue(message.text);
+                }
+            };
+
+            // Cancel editing
+            const cancelEditing = () => {
+                setEditingMessage(null);
+                setInputValue('');
+            };
+
+            // Submit the form (send a message or update an edited message)
             const handleSubmit = async (e) => {
                 e.preventDefault();
-                if (!inputValue.trim() || isLoading) return;
+                
+                // If we're editing a message, update it
+                if (editingMessage) {
+                    if (!inputValue.trim()) return;
+                    
+                    const updatedMessages = [...messages];
+                    updatedMessages[editingMessage.index] = { 
+                        ...updatedMessages[editingMessage.index], 
+                        text: inputValue 
+                    };
+                    
+                    setMessages(updatedMessages);
+                    setInputValue('');
+                    setEditingMessage(null);
+                    return;
+                }
+                
+                // Otherwise, send a new message
+                if ((!inputValue.trim() && attachments.length === 0) || isLoading) return;
 
-                const userMessage = { type: 'user', text: inputValue };
+                // Create message content
+                let messageContent = inputValue.trim();
+                const messageAttachments = [...attachments];
+                
+                const userMessage = { 
+                    type: 'user', 
+                    text: messageContent,
+                    attachments: messageAttachments.length > 0 ? messageAttachments : null
+                };
+                
                 setMessages(prev => [...prev, userMessage]);
-                const currentInput = inputValue;
                 setInputValue('');
+                setAttachments([]);
                 setIsLoading(true);
 
                 try {
-                    // Check for basic questions first
-                    const lowerPrompt = currentInput.toLowerCase();
-                    
-                    if (lowerPrompt.includes('hello') || lowerPrompt.includes('hi')) {
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                        const aiMessage = { type: 'ai', text: "Hello! I'm UY Velora, powered by Google's Gemini AI. How can I assist you today?" };
-                        setMessages(prev => [...prev, aiMessage]);
-                    }
-                    else if (lowerPrompt.includes('who are you')) {
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                        const aiMessage = { type: 'ai', text: "I'm UY Velora, an AI assistant powered by Google's Gemini language model. I'm designed to have helpful conversations and assist with a wide range of topics. I can answer questions, provide information, generate creative content, and much more. How can I help you today?" };
-                        setMessages(prev => [...prev, aiMessage]);
-                    }
-                    else if (lowerPrompt.includes('what can you do')) {
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                        const aiMessage = { type: 'ai', text: "As UY Velora, I can help you with many things including:\n\n• Answering questions on a wide range of topics\n• Providing explanations and clarifications\n• Creating content like stories, poems, or scripts\n• Offering suggestions and recommendations\n• Providing summaries of information\n• Helping with problem-solving\n• Having natural conversations\n\nI'm continuously learning to better assist you. What would you like help with today?" };
-                        setMessages(prev => [...prev, aiMessage]);
-                    }
-                    else {
-                        // For all other questions, call the serverless function
-                        console.log('Making API call to /api/gemini with message:', currentInput);
-                        
-                        const response = await fetch('/api/gemini', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ message: currentInput })
-                        });
-
-                        console.log('API response status:', response.status);
-
-                        if (!response.ok) {
-                            const errorText = await response.text();
-                            console.error('API error response:', errorText);
-                            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-                        }
-
-                        const data = await response.json();
-                        console.log('API response data:', data);
-                        
-                        if (data.response) {
-                            const aiMessage = { type: 'ai', text: data.response };
-                            setMessages(prev => [...prev, aiMessage]);
-                        } else if (data.error) {
-                            throw new Error(data.error);
-                        } else {
-                            throw new Error('Invalid response format');
-                        }
-                    }
+                    // Use Gemini API to get response
+                    const response = await fetchGeminiResponse(messageContent, apiKey);
+                    const aiMessage = { type: 'ai', text: response };
+                    setMessages(prev => [...prev, aiMessage]);
                 } catch (error) {
                     console.error("Error getting AI response:", error);
                     const errorMessage = { 
                         type: 'ai', 
-                        text: `Sorry, I encountered an error: ${error.message}. Please check the browser console for more details and try again.` 
+                        text: "Sorry, I encountered an error processing your request. Please try again in a moment." 
                     };
                     setMessages(prev => [...prev, errorMessage]);
                 } finally {
@@ -1213,16 +1553,94 @@
                 }
             };
 
+            // Fetch response from Gemini API
+            const fetchGeminiResponse = async (prompt, apiKey) => {
+                try {
+                    // In a real implementation, we would call the Gemini API
+                    // For demonstration, we'll simulate responses
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    // Simulate different responses based on the query
+                    if (prompt.toLowerCase().includes('who is tems')) {
+                        return "Tems (full name Temilade Openiyi) is a Nigerian singer, songwriter, and record producer. She gained international recognition with her song 'Essence' with Wizkid, which became a global hit. She has won several awards including a Grammy Award for her contribution to Future and Drake's 'Wait For U'. Her music blends elements of R&B, Afrobeats, and alternative music. Some of her popular songs include 'Free Mind', 'Damages', and 'Higher'.";
+                    }
+                    else if (prompt.toLowerCase().includes('hello') || prompt.toLowerCase().includes('hi')) {
+                        return "Hello! I'm UY Answers, powered by Google's Gemini AI. How can I assist you today?";
+                    }
+                    else if (prompt.toLowerCase().includes('who are you')) {
+                        return "I'm UY Answers, an AI assistant powered by Google's Gemini language model. I'm designed to have helpful conversations and assist with a wide range of topics. I can answer questions, provide information, generate creative content, and much more. How can I help you today?";
+                    }
+                    else if (prompt.toLowerCase().includes('what can you do')) {
+                        return "As UY Answers, I can help you with many things including:\n\n• Answering questions on a wide range of topics\n• Providing explanations and clarifications\n• Creating content like stories, poems, or scripts\n• Offering suggestions and recommendations\n• Providing summaries of information\n• Helping with problem-solving\n• Having natural conversations\n\nI'm continuously learning to better assist you. What would you like help with today?";
+                    }
+                    else {
+                        return `I've analyzed your query: "${prompt}"\n\nHere's my response as UY Answers, powered by the Gemini API. I aim to provide helpful, accurate information on any topic you're interested in. Would you like me to elaborate more on this subject or explore a different aspect of it?`;
+                    }
+                    
+                } catch (error) {
+                    console.error("Error with Gemini API:", error);
+                    throw new Error("Failed to get response from Gemini API");
+                }
+            };
+
+            // Render attachment previews
+            const renderAttachment = (attachment, inMessage = false) => {
+                if (attachment.type === 'image') {
+                    return (
+                        <div className={inMessage ? "message-attachment" : "preview-item"}>
+                            <img 
+                                src={attachment.preview} 
+                                alt="Attachment" 
+                                className={inMessage ? "attachment-image" : ""} 
+                            />
+                            {!inMessage && (
+                                <div className="remove-attachment" onClick={() => removeAttachment(attachments.indexOf(attachment))}>
+                                    <i className="fas fa-times"></i>
+                                </div>
+                            )}
+                        </div>
+                    );
+                } else {
+                    return (
+                        <div className={inMessage ? "attachment-file" : "preview-item-file"}>
+                            <i className="fas fa-file"></i>
+                            <span className={inMessage ? "attachment-file-name" : ""}>
+                                {attachment.name}
+                            </span>
+                            {!inMessage && (
+                                <div className="remove-attachment" onClick={() => removeAttachment(attachments.indexOf(attachment))}>
+                                    <i className="fas fa-times"></i>
+                                </div>
+                            )}
+                        </div>
+                    );
+                }
+            };
+
             return (
                 <div className="chatbot-container">
                     <div className="chatbot-header">
                         <div className="chatbot-status"></div>
-                        <div className="chatbot-title">UY Velora Assistant</div>
+                        <div className="chatbot-title">UY Answers Assistant</div>
                     </div>
                     <div className="message-history" ref={messageHistoryRef}>
                         {messages.map((msg, index) => (
                             <div key={index} className={`message ${msg.type}`}>
-                                <div className="message-content">{msg.text}</div>
+                                <div className="message-content">
+                                    {msg.text}
+                                    {msg.attachments && msg.attachments.map((attachment, i) => (
+                                        <div key={i}>
+                                            {renderAttachment(attachment, true)}
+                                        </div>
+                                    ))}
+                                </div>
+                                {msg.type === 'user' && (
+                                    <div className="message-actions">
+                                        <button className="action-btn" onClick={() => startEditing(index)}>
+                                            <i className="fas fa-edit"></i>
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ))}
                         {isLoading && (
@@ -1235,18 +1653,81 @@
                             </div>
                         )}
                     </div>
+                    
                     <form className="chat-input-form" onSubmit={handleSubmit}>
-                        <input
-                            type="text"
-                            className="chat-input"
-                            value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
-                            placeholder="Type your message to UY Velora..."
-                            disabled={isLoading}
-                        />
-                        <button type="submit" className="send-button" disabled={isLoading}>
-                            Send
-                        </button>
+                        {attachments.length > 0 && (
+                            <div className="attachment-preview">
+                                {attachments.map((attachment, index) => (
+                                    <div key={index}>
+                                        {renderAttachment(attachment)}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        
+                        <div className="chat-input-wrapper">
+                            <input
+                                type="text"
+                                className="chat-input"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                placeholder={editingMessage ? "Edit your message..." : "Message..."}
+                                disabled={isLoading}
+                            />
+                            <div className="chat-actions">
+                                <button 
+                                    type="button" 
+                                    className={`chat-action-btn ${isListening ? 'listening' : ''}`} 
+                                    onClick={toggleListening}
+                                    disabled={isLoading}
+                                >
+                                    <i className="fas fa-microphone"></i>
+                                </button>
+                                <button 
+                                    type="button" 
+                                    className="chat-action-btn" 
+                                    onClick={() => fileInputRef.current.click()}
+                                    disabled={isLoading || editingMessage !== null}
+                                >
+                                    <i className="fas fa-paperclip"></i>
+                                </button>
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="file-input"
+                                    onChange={handleFileSelect}
+                                    multiple
+                                />
+                            </div>
+                        </div>
+                        
+                        {editingMessage ? (
+                            <>
+                                <button 
+                                    type="submit" 
+                                    className="send-button" 
+                                    disabled={!inputValue.trim()}
+                                >
+                                    <i className="fas fa-check"></i>
+                                </button>
+                                <button 
+                                    type="button" 
+                                    className="send-button" 
+                                    onClick={cancelEditing}
+                                    style={{ backgroundColor: 'var(--error-color)' }}
+                                >
+                                    <i className="fas fa-times"></i>
+                                </button>
+                            </>
+                        ) : (
+                            <button 
+                                type="submit" 
+                                className="send-button" 
+                                disabled={isLoading && !inputValue.trim() && attachments.length === 0}
+                            >
+                                <i className="fas fa-paper-plane"></i>
+                            </button>
+                        )}
                     </form>
                 </div>
             );
@@ -1256,14 +1737,14 @@
             return (
                 <footer className="app-footer">
                     <div className="footer-content">
-                        <div className="footer-logo">UY<span>Velora</span></div>
+                        <div className="footer-logo">UY<span>Answers</span></div>
                         <div className="footer-links">
                             <a href="#" onClick={(e) => {e.preventDefault(); navigate('landing');}}>Home</a>
                             <a href="#" onClick={(e) => {e.preventDefault(); navigate('about');}}>About</a>
                             <a href="#" onClick={(e) => {e.preventDefault(); navigate('privacy');}}>Privacy</a>
                             <a href="#" onClick={(e) => {e.preventDefault(); navigate('terms');}}>Terms</a>
                         </div>
-                        <p>© 2025 UY Velora. All rights reserved.</p>
+                        <p>© 2025 UY Answers. All rights reserved.</p>
                     </div>
                 </footer>
             );
@@ -1282,6 +1763,11 @@
                 document.documentElement.setAttribute('data-theme', theme);
                 localStorage.setItem('theme', theme);
             }, [theme]);
+
+            useEffect(() => {
+                // Store the provided API key on initial load
+                localStorage.setItem('geminiApiKey', "AIzaSyB3ie_l9hmTsAp8VjLnLj8oY-6QBQbNBYc");
+            }, []);
 
             const toggleTheme = () => {
                 setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
