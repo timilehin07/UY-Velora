@@ -22,10 +22,11 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Message is required" })
     }
 
-    // Your Gemini API key - consider using environment variables for security
+    // Your Gemini API key
     const API_KEY = process.env.GEMINI_API_KEY || "AIzaSyCrzBcmTtgIdtZQqSI7UCcq5dac0gee_Vw"
 
-    const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
+    // UPDATED: Fixed API endpoint with correct model name and version
+    const endpoint = "https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent"
 
     const requestBody = {
       contents: [
@@ -62,7 +63,7 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json()
-    console.log("Gemini API response data:", JSON.stringify(data, null, 2))
+    console.log("Gemini API response data:", JSON.stringify(data).substring(0, 200) + "...")
 
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
       const aiResponse = data.candidates[0].content.parts[0].text
