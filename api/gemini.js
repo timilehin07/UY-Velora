@@ -22,11 +22,17 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Message is required" })
     }
 
-    // Your Gemini API key
-    const API_KEY = process.env.GEMINI_API_KEY || "AIzaSyCrzBcmTtgIdtZQqSI7UCcq5dac0gee_Vw"
+    // Get API key from environment variables
+    const API_KEY = process.env.GEMINI_API_KEY
 
-    // UPDATED: Fixed API endpoint with correct model name and version
-    const endpoint = "https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent"
+    if (!API_KEY) {
+      return res.status(500).json({
+        error: "API key not configured. Please set GEMINI_API_KEY environment variable.",
+      })
+    }
+
+    // Use the working endpoint (based on diagnostic results)
+    const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
 
     const requestBody = {
       contents: [
@@ -42,7 +48,7 @@ export default async function handler(req, res) {
       },
     }
 
-    console.log("Making request to Gemini API with message:", message)
+    console.log("Making request to Gemini API...")
 
     const response = await fetch(`${endpoint}?key=${API_KEY}`, {
       method: "POST",
@@ -57,13 +63,21 @@ export default async function handler(req, res) {
     if (!response.ok) {
       const errorData = await response.text()
       console.error("Gemini API Error:", response.status, errorData)
+
+      if (response.status === 400 && errorData.includes("API_KEY_INVALID")) {
+        return res.status(400).json({
+          error: "Invalid API key. Please check your GEMINI_API_KEY environment variable.",
+          details: "Generate a new API key at https://makersuite.google.com/app/apikey",
+        })
+      }
+
       return res.status(response.status).json({
-        error: `Gemini API error: ${response.status} - ${errorData}`,
+        error: `Gemini API error: ${response.status}`,
+        details: errorData,
       })
     }
 
     const data = await response.json()
-    console.log("Gemini API response data:", JSON.stringify(data).substring(0, 200) + "...")
 
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
       const aiResponse = data.candidates[0].content.parts[0].text
